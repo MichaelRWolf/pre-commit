@@ -1,12 +1,27 @@
 """Tests for pre_commit.xargs when os.sysconf is blocked in sandbox."""
 from __future__ import annotations
 
+import os
+import pathlib
 import subprocess
 import sys
 import textwrap
 
 # Error message when os.sysconf is blocked in the test subprocess
 BLOCKED_SYSCONF_ERROR = 'blocked'
+
+
+def _get_repo_root() -> str:
+    """Get the git repository root directory."""
+    # Start from this test file's directory
+    current = pathlib.Path(__file__).parent
+    # Navigate up to find the git repo root
+    while current != current.parent:
+        if (current / '.git').exists():
+            return str(current)
+        current = current.parent
+    # Fallback to current directory if we can't find it
+    return os.getcwd()
 
 
 def _create_import_test_script() -> str:
@@ -60,7 +75,7 @@ def test_import_module_without_throwing_exception_as_subprocess() -> None:
         [sys.executable, '-c', script],
         capture_output=True,
         text=True,
-        cwd='/Users/michael/repos/pre-commit',
+        cwd=_get_repo_root(),
     )
 
     # Assert the subprocess succeeded (import worked without exception)
@@ -141,7 +156,7 @@ def test_xargs_without_max_length_when_sysconf_blocked_as_subprocess() -> None:
         [sys.executable, '-c', script],
         capture_output=True,
         text=True,
-        cwd='/Users/michael/repos/pre-commit',
+        cwd=_get_repo_root(),
     )
 
     # Assert the subprocess succeeded (xargs worked without exception)
@@ -171,7 +186,7 @@ def test_xargs_with_explicit_max_length_when_sysconf_blocked_as_subprocess(
         [sys.executable, '-c', script],
         capture_output=True,
         text=True,
-        cwd='/Users/michael/repos/pre-commit',
+        cwd=_get_repo_root(),
     )
 
     # Assert the subprocess succeeded (xargs worked with explicit _max_length)
