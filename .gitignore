@@ -3,4 +3,10 @@
 /.coverage
 /.tox
 /dist
+/build
+*.egg
+.eggs/
+__pycache__/
+*.so
+.Python
 .vscode/
